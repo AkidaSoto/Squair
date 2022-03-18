@@ -9,29 +9,29 @@ The idea is for it to only know to navigate the world, assign value to objects a
 Sequence of actions:
 
 1. Assess the surroundings. The square looks around and see if the pattern of objects (the CONTEXT) around it is familiar. 
-  * If not, make a new CONTEXT memory node.
-  * If yes, remember that CONTEXT memory node. 
+  - If not, make a new CONTEXT memory node.
+  - If yes, remember that CONTEXT memory node. 
 
 2. Determine the possible decisions to make in this CONTEXT
-  * There is 9 possible directions to go in
-  *   * each direction is a STATE memory node
+  - There is 9 possible directions to go in
+     - each direction is a STATE memory node
     
-  * If old CONTEXT recall the REWARD for each STATE memory node⋅⋅
-  * If old CONTEXT recall the STATE transition for each STATE memory node.
+  - If old CONTEXT recall the REWARD for each STATE memory node⋅⋅
+  - If old CONTEXT recall the STATE transition for each STATE memory node.
 
-  * Use a softmax equations using REWARDS to determine the liklihood to move in any direction. Pick ACTION.
+  - Use a softmax equations using REWARDS to determine the liklihood to move in any direction. Pick ACTION.
 
 3. Execute decision
 
 4. Assess feedback. 
-  * Calculate the OUTCOME
-  * Compare OUTCOME to REWARD from chosen ACTION of a STATE   
-  *   * compute prediction error
-  * Update REWARD for 
-  *   * CONTEXT-STATE-ACTION-REWARD pairing memory node
-  *   * ⋅STATE-ACTION-REWARD pairing memory node
-  *   * STATE-REWARD pairing memory node
-  *   * STATE-STATE transition pairing memory node
+  - Calculate the OUTCOME
+  - Compare OUTCOME to REWARD from chosen ACTION of a STATE   
+     - compute prediction error
+  - Update REWARD for 
+     - CONTEXT-STATE-ACTION-REWARD pairing memory node
+     - ⋅STATE-ACTION-REWARD pairing memory node
+     - STATE-REWARD pairing memory node
+     - STATE-STATE transition pairing memory node
 
 
 Addition functions
