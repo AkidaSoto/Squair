@@ -6,7 +6,9 @@ The square is in a grid. It can see one space in all directions and can move one
 
 The idea is for it to only know to navigate the world, assign value to objects and remember the past. 
 
-We will eventually put objects on the map the square can interact with. These will reward or punish the square. It will learn to associate the actions it took that lead to that outcome as well as the environment that lead to that specific outcome. It will remember that information and will try to either increase or decrease the liklihood of the outcome in the future.
+We will eventually put objects on the map the square can interact with. These will reward or punish the square. It will learn to associate the actions it took that lead to that outcome as well as the environment that lead to that specific outcome. It will remember that information and will try to either increase or decrease the likelihood of the outcome in the future.
+
+This will be done by using SARSA or Reinforcement Learning algorithms. What's cool about these models is that only activated nodes and it's connections are modified so there's no reactive updating of previous or inactive variables (That any basic ML would do). Despite that, the model is still able to learn and adjust behaviors by proactively anticipating actions and rewards.
 
 Sequence of actions:
 
@@ -64,3 +66,9 @@ HYBRID Learner
 
 SOFTMAX EQUATION for any decision models
   - P(s,a)=exp(τ×Q(s,a))∑nb=1exp(τ×Q(s,b))
+
+Thoughts for myself:
+    The softmax equation acts pretty odd when Q values are not 1?
+    Relative values if Q were [0,10] could simplify to [0,1]?
+    Should R be => R/max(R)?
+    This wouldn't translate well when comparing Q's that originally had different Rs? Max(R) implies a unique memory node for REWARDS?
