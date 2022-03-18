@@ -50,18 +50,17 @@ FORMULAS
 from:  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2895323/
 
 Model-Free learning (for STATE-ACTION-REWARD)
-δRPE = R - QSARSA(s, a)
-QSARSA(s, a) = QSARSA(s, a) + αδRPE
+  - δRPE = R - QSARSA(s, a)
+  - QSARSA(s, a) = QSARSA(s, a) + αδRPE
 
 State Learning (for STATE-ACTION-STATE)
-δSPE = 1 − T(s, a, s′)
-T(s, a, s′) = T(s, a, s′) + ηδSPE
-
-QFWD(s,a)=∑s′T(s,a,s′)×(r(s′)+argmaxa′QFWD(s′,a′))
+  - δSPE = 1 − T(s, a, s′)
+  - T(s, a, s′) = T(s, a, s′) + ηδSPE
+  - QFWD(s,a)=∑s′T(s,a,s′)×(r(s′)+argmaxa′QFWD(s′,a′))
 
 HYBRID Learner
-wt = l × e−kt
-QHYB(s, a) = wt × QFWD(s, a) + (1 − wt) × QSARSA(s, a)
+  - wt = l × e−kt
+  - QHYB(s, a) = wt × QFWD(s, a) + (1 − wt) × QSARSA(s, a)
 
 SOFTMAX EQUATION for any decision models
-P(s,a)=exp(τ×Q(s,a))∑nb=1exp(τ×Q(s,b))
+  - P(s,a)=exp(τ×Q(s,a))∑nb=1exp(τ×Q(s,b))
