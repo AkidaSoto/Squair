@@ -19,61 +19,60 @@ from pygame.locals import (
     QUIT,
 )
 
+Square_Size = 75
+
+# Define constants for the screen width and height
+Multiplier = 10
+SCREEN_WIDTH = Square_Size*Multiplier 
+SCREEN_HEIGHT = Square_Size*Multiplier 
+
 # Define a Player object by extending pygame.sprite.Sprite
 # The surface drawn on the screen is now an attribute of 'player'
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.Surface((75, 75))
+        self.surf = pygame.Surface((Square_Size, Square_Size))
         self.surf.fill((0, 0, 255))
-        self.rect =  self.surf.get_rect()
+        self.rect =   pygame.Rect(Square_Size, Square_Size, Square_Size, Square_Size)
 
 # Move the sprite based on user keypresses
     def update(self, pressed_keys):
+
+
         if pressed_keys[K_UP]:
-            self.rect.move_ip(0, -5)
+            self.rect.move_ip(0, -Square_Size)
         if pressed_keys[K_DOWN]:
-            self.rect.move_ip(0, 5)
+            self.rect.move_ip(0, Square_Size)
         if pressed_keys[K_LEFT]:
-            self.rect.move_ip(-5, 0)
+            self.rect.move_ip(-Square_Size, 0)
         if pressed_keys[K_RIGHT]:
-            self.rect.move_ip(5, 0)
+            self.rect.move_ip(Square_Size, 0)
+
+        if pygame.sprite.spritecollideany(player, collisions):     
+            if pressed_keys[K_UP]:
+                self.rect.move_ip(0, Square_Size)
+            if pressed_keys[K_DOWN]:
+                self.rect.move_ip(0, -Square_Size)
+            if pressed_keys[K_LEFT]:
+                self.rect.move_ip(Square_Size, 0)
+            if pressed_keys[K_RIGHT]:
+                self.rect.move_ip(-Square_Size, 0)
+
 
 # Define the enemy object by extending pygame.sprite.Sprite
 # The surface you draw on the screen is now an attribute of 'enemy'
-class Enemy(pygame.sprite.Sprite):
+class Collision(pygame.sprite.Sprite):
     def __init__(self):
-        super(Enemy, self).__init__()
-        self.surf = pygame.Surface((20, 10))
-        self.surf.fill((255, 0, 0))
-        self.rect = self.surf.get_rect(
-            center=(
-                random.randint(SCREEN_WIDTH + 20, SCREEN_WIDTH + 100),
-                random.randint(0, SCREEN_HEIGHT),
-            )
-        )
-        self.speed = random.randint(5, 20)
-
-    # Move the sprite based on speed
-    # Remove the sprite when it passes the left edge of the screen
-    def update(self):
-        self.rect.move_ip(-self.speed, 0)
-        if self.rect.right < 0:
-            self.kill()
+        super(Collision, self).__init__()
+        self.surf = pygame.Surface((Square_Size, Square_Size))
+        self.surf.fill((0,0,0))
+        self.rect = self.surf.get_rect()
 
 pygame.init()
-
-# Define constants for the screen width and height
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
 
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-# Create a custom event for adding a new enemy
-ADDENEMY = pygame.USEREVENT + 1
-pygame.time.set_timer(ADDENEMY, 250)
 
 # Instantiate player. Right now, this is just a rectangle.
 player = Player()
@@ -81,15 +80,38 @@ player = Player()
 # Create groups to hold enemy sprites and all sprites
 # - enemies is used for collision detection and position updates
 # - all_sprites is used for rendering
-enemies = pygame.sprite.Group()
+collisions = pygame.sprite.Group()
+walkable = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-all_sprites.add(player)
 
 # Run until the user asks to quit
 running = True
 
 # Setup the clock for a decent framerate
 clock = pygame.time.Clock()
+
+# Create a map with boundaries
+
+def drawGrid():
+    for x in range(0, SCREEN_WIDTH, Square_Size):
+        for y in range(0, SCREEN_HEIGHT, Square_Size):
+            rect = pygame.Rect(x, y, Square_Size, Square_Size)
+
+            new_collision = Collision()
+            new_collision.rect = pygame.Rect(x, y, Square_Size, Square_Size)
+            
+            if x == 0 or y == 0 or x == SCREEN_WIDTH-Square_Size or y == SCREEN_WIDTH-Square_Size:
+               new_collision.surf.fill((0,0,0))
+
+               collisions.add(new_collision)
+            else:
+               new_collision.surf.fill((255,255,255))
+               walkable.add(new_collision)
+            
+            all_sprites.add(new_collision)
+                
+drawGrid()
+all_sprites.add(player)
 
 while running:
 
@@ -104,24 +126,14 @@ while running:
         elif event.type == QUIT:
             running = False
 
-        # Add a new enemy?
-        elif event.type == ADDENEMY:
-            # Create the new enemy and add it to sprite groups
-            new_enemy = Enemy()
-            enemies.add(new_enemy)
-            all_sprites.add(new_enemy)
-
     # Get the set of keys pressed and check for user input
     pressed_keys = pygame.key.get_pressed()
 
-    # Update the player sprite based on user keypresses
+    # Update the player sprite based on user keypresses    
+
     player.update(pressed_keys)
-
-    # Fill the background with white
-    screen.fill((255, 255, 255))
-
    # Update enemy position
-    enemies.update()
+    #enemies.update()
 
     # Draw a solid blue circle in the center
     #pygame.draw.rect(screen, (0, 0, 255), pygame.Rect(30, 30, 60, 60))
@@ -130,11 +142,6 @@ while running:
     for entity in all_sprites:
      screen.blit(entity.surf, entity.rect)
 
-    # Check if any enemies have collided with the player
-    if pygame.sprite.spritecollideany(player, enemies):
-        # If so, then remove the player and stop the loop
-        player.kill()
-        running = False
 
     # Flip the display
     pygame.display.flip()
