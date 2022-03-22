@@ -72,3 +72,6 @@ Thoughts for myself:
     Relative values if Q were [0,10] could simplify to [0,1]?
     Should R be => R/max(R)?
     This wouldn't translate well when comparing Q's that originally had different Rs? Max(R) implies a unique memory node for REWARDS?
+
+    Is magnitude of prediction error related to alpha learning rate? alpha already modifies prediction error which collectively modifies Q so would it be too recursive for prediction error to also affect alpha?
+    Or could we say that positive prediction error reduces connections of inactive Q while negative prediction errors increases connections of inactive Qs? The softmax equation already makes it as a default that decreased Q increases exploration.
