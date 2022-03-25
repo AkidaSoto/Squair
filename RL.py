@@ -19,8 +19,8 @@ class TraditionalRL():
         for direction in range(0,7):
 
             action = self.createAction()
-            action['x'] = math.floor(math.sin(math.radians(direction*45)))
-            action['y'] = math.floor(math.cos(math.radians(direction*45)))
+            action['x'] = round(math.sin(math.radians(direction*45)))
+            action['y'] = round(math.cos(math.radians(direction*45)))
 
             self.possibleA.append(action)
 

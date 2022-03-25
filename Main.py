@@ -22,6 +22,7 @@ from pygame.locals import (
     K_ESCAPE,
     KEYDOWN,
     QUIT,
+    MOUSEWHEEL
 )
 
 Square_Size = 75
@@ -33,6 +34,14 @@ SCREEN_HEIGHT = Square_Size*Multiplier
 
 
 all_sprites = pygame.sprite.Group()
+
+
+class RectSprite(pygame.sprite.Sprite):
+    def __init__(self, color, x, y, w, h):
+        super().__init__() 
+        self.image = pygame.Surface((w, h))
+        self.image.fill(color)
+        self.rect = pygame.Rect(x, y, w, h)
 
 # Define a Player object by extending pygame.sprite.Sprite
 # The surface drawn on the screen is now an attribute of 'player'
@@ -57,7 +66,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
 
         self.detectCenter()
-        
+        self.detectSurround()
     
         previousStateidx, actionidx, action = self.RL.makeAction(self)
         self.rect.move_ip(action['x']*Square_Size, action['y']*Square_Size)
@@ -139,7 +148,10 @@ running = True
 # Setup the clock for a decent framerate
 clock = pygame.time.Clock()
 
+mouse = RectSprite((255, 0, 0), Square_Size, Square_Size, Square_Size, Square_Size)
 
+color = [(0,0,0), (255, 0, 0), (0,255,0),(0,0,255), (255,255,0), (255,0,255),(0,255,255), (255,255,255)]
+coloridx = 0
 while running:
 
     # Did the user click the window close button?
@@ -149,7 +161,11 @@ while running:
             # Was it the Escape key? If so, stop the loop.
             if event.key == K_ESCAPE:
                 running = False
-
+                
+        elif event.type == MOUSEWHEEL:
+            coloridx += event.y
+            coloridx = coloridx % len(color)
+            mouse.image.fill(color[coloridx])
         elif event.type == QUIT:
             running = False
 
@@ -157,16 +173,23 @@ while running:
     # Update the player sprite 
     player.update()
 
+    mousepos = pygame.mouse.get_pos()
+    mousepos = (round((mousepos[0]-(.5*Square_Size))/Square_Size)*Square_Size, round((mousepos[1]-(.5*Square_Size))/Square_Size)*Square_Size)
+    mouse.rect = pygame.Rect(mousepos[0], mousepos[1],Square_Size, Square_Size)
+
     # Draw all sprites
     for entity in all_sprites:
      screen.blit(entity.surf, entity.rect)
 
     screen.blit(player.surf, player.rect)
+    
+
+    screen.blit(mouse.image, mouse.rect)
     # Flip the display
     pygame.display.flip()
 
     # Ensure program maintains a rate of 30 frames per second
-    clock.tick(30)
+    clock.tick(20)
 
 # Done! Time to quit.
 pygame.quit()
