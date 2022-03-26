@@ -17,7 +17,6 @@ Sequence of actions:
   - to be implemented (beginner):
   - cardinal direction: look at the cartesian plane and their reward history
   - relative face: look at it's relative position and the reward history
-  - internal state: some kind of hunger state?
 
   - to be implemented (advanced):
   - Policy creation/policy fusion: see a.
@@ -48,6 +47,12 @@ Sequence of actions:
   - Update REWARD for 
      - POLICY-STATE-ACTION-REWARD pairing memory node
 
+  - to be implemented:
+    Reward type outcomes? depending on internal needs and motivations?
+    for example: While food is good, when I'm sleepy, I rather sleep than eat. 
+    Variable reward outcomes?
+    Internal states for policy decisions?
+
 TO DO:
 
 Addition RL functions
@@ -61,6 +66,13 @@ It's still a start though.
 
 Spacial state chunking seems like visual chunking but temporal state chunking seems like model-based learning or state-transition memory? 
 
+Notes: 
+  Probability of policy are create using softmax equation.
+  The highest probablity policy is the one that is used.
+  Learning update is only applied to the used policy.
+  Entropy determines when a new policy is used (though threshold isn't mentioned)
+  Values from old policy is transfered to new policy. (This is nice, for saving data space)
+
 B.) Rumination:
 The idea of not doing anything but thinking and modifiying a plan by projecting hypotheticals is a part of living creatures!
 Implementing some kind of history recall system (Long and Short-term memory?) and off-policy RL applications seems like the way to do that.
@@ -69,11 +81,14 @@ https://kowshikchilamkurthy.medium.com/off-policy-vs-on-policy-vs-offline-reinfo
 C.) Habit formation over rides reward contingency changes (Action Chunking for Sequential Learning):
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3325518/ 
 
+D.) Motivation:
+    Reward type and changing motivations/goals.
+    This might be linked to B
+
 Gaming Features:
 
 Reward View: Each tile has the reward value visible for user
 Eating should be a seperate action?
-
 
 FORMULAS
 
@@ -102,3 +117,7 @@ Thoughts for myself:
 
     Is magnitude of prediction error related to alpha learning rate? alpha already modifies prediction error which collectively modifies Q so would it be too recursive for prediction error to also affect alpha?
     Or could we say that positive prediction error reduces connections of inactive Q while negative prediction errors increases connections of inactive Qs? The softmax equation already makes it as a default that decreased Q increases exploration.
+
+    There seems to be a link between abiity to ruminate and intelligence?
+    When all internal needs are met, moving about and food search is not particularly needed.
+    Gives more time for off-policy RL? 
