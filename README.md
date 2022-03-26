@@ -1,10 +1,9 @@
 # Squair
 
+Sqi[ai]r
 A pet square that is self learning but also can be taught.
 
-The square is in a grid. It can see one space in all directions and can move one space in any direction.  
-
-The idea is for it to only know to navigate the world, assign value to objects and remember the past. 
+The square is in a grid. It can see one space in all directions and can move one space in any direction. The idea is for it to only know to navigate the world, assign value to objects and remember the past. 
 
 We will eventually put objects on the map the square can interact with. These will reward or punish the square. It will learn to associate the actions it took that lead to that outcome as well as the environment that lead to that specific outcome. It will remember that information and will try to either increase or decrease the likelihood of the outcome in the future.
 
@@ -12,45 +11,73 @@ This will be done by using SARSA or Reinforcement Learning algorithms. What's co
 
 Sequence of actions:
 
-1. Assess the surroundings. The square looks around and see if the pattern of objects (the CONTEXT) around it is familiar. 
-  - If not, make a new CONTEXT memory node.
-  - If yes, remember that CONTEXT memory node. 
+1. Determine the POLICY (action plan) to do:
+  - surrounding tile (implemented): look at the surrounding tiles and their reward history
+  
+  - to be implemented (beginner):
+  - cardinal direction: look at the cartesian plane and their reward history
+  - relative face: look at it's relative position and the reward history
+  - internal state: some kind of hunger state?
 
-2. Determine the possible decisions to make in this CONTEXT
-  - There is 9 possible directions to go in
-     - each direction is a STATE memory node
-    
-  - If old CONTEXT recall the REWARD for each STATE memory node⋅⋅
-  - If old CONTEXT recall the STATE transition for each STATE memory node.
+  - to be implemented (advanced):
+  - Policy creation/policy fusion: see a.
+  - Rumination (action do nothing but applyoff-policy RL): see b.
 
-  - Use a softmax equations using REWARDS to determine the liklihood to move in any direction. Pick ACTION.
+1. Depending on the POLICY, determine it's current STATE and if it has a history with it. 
+  - If not, make a new STATE memory node.
+  - If yes, recall that STATE memory node. 
+
+  - to be implemented:
+  - If possible to create some kind of state-chunking?: see a.
+
+2. Determine the possible decisions to make in the STATE
+  - There are 8 possible directions to go in
+     - some policy can have repeition or choices that share reward history 
+
+  - to be implemented:
+  - Action chunking, action creation: see c.
+
+  - Use a softmax equations using predicted REWARDS to determine the liklihood to move in any direction. Pick ACTION.
 
 3. Execute decision
 
 4. Assess feedback. 
   - Calculate the OUTCOME
-  - Compare OUTCOME to REWARD from chosen ACTION of a STATE   
+  - Compare OUTCOME to predicted REWARD from chosen ACTION of a STATE given a policy
      - compute prediction error
   - Update REWARD for 
-     - CONTEXT-STATE-ACTION-REWARD pairing memory node
-     - ⋅STATE-ACTION-REWARD pairing memory node
-     - STATE-REWARD pairing memory node
-     - STATE-ACTION-STATE transition pairing memory node
+     - POLICY-STATE-ACTION-REWARD pairing memory node
 
+TO DO:
 
-Addition functions
-
-Memory nodes for individual spaces it can move on. 
-
-CONTEXT memory loads are efficient by reorienting the space from the direction the square moved in. 
-
+Addition RL functions
 Add in an option to “train” the square by external reward/punishment from the user (REWARD override)
+
+A.) Feature Detection:
+This papers talks about value transfer when switching between different policy:
+https://www.nature.com/articles/s41598-017-17687-2#Fig2
+So they talk about policy fusion but they don't talk about policy creation or state chunking. 
+It's still a start though.
+
+Spacial state chunking seems like visual chunking but temporal state chunking seems like model-based learning or state-transition memory? 
+
+B.) Rumination:
+The idea of not doing anything but thinking and modifiying a plan by projecting hypotheticals is a part of living creatures!
+Implementing some kind of history recall system (Long and Short-term memory?) and off-policy RL applications seems like the way to do that.
+https://kowshikchilamkurthy.medium.com/off-policy-vs-on-policy-vs-offline-reinforcement-learning-demystified-f7f87e275b48
+
+C.) Habit formation over rides reward contingency changes (Action Chunking for Sequential Learning):
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3325518/ 
+
+Gaming Features:
+
+Reward View: Each tile has the reward value visible for user
+Eating should be a seperate action?
 
 
 FORMULAS
 
 from:  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2895323/
-
 Model-Free learning (for STATE-ACTION-REWARD)
   - δRPE = R - QSARSA(s, a)
   - QSARSA(s, a) = QSARSA(s, a) + αδRPE
@@ -59,13 +86,13 @@ State Learning (for STATE-ACTION-STATE)
   - δSPE = 1 − T(s, a, s′)
   - T(s, a, s′) = T(s, a, s′) + ηδSPE
   - QFWD(s,a)=∑s′T(s,a,s′)×(r(s′)+argmaxa′QFWD(s′,a′))
-
 HYBRID Learner
   - wt = l × e−kt
   - QHYB(s, a) = wt × QFWD(s, a) + (1 − wt) × QSARSA(s, a)
 
 SOFTMAX EQUATION for any decision models
   - P(s,a)=exp(τ×Q(s,a))∑nb=1exp(τ×Q(s,b))
+
 
 Thoughts for myself:
     The softmax equation acts pretty odd when Q values are not 1?
