@@ -22,7 +22,7 @@ class TraditionalRL():
         self.Qs = []
 
         self.alpha = .5
-        self.beta = 30
+        self.beta = 2
 
     def CheckState(self,player):
 

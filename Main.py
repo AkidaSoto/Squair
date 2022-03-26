@@ -3,11 +3,10 @@
 
 # Import and initialize the pygame library
 from distutils.log import error
-from operator import truediv
+#from operator import truediv
 import pygame
 
 # Import random for random numbers
-import random
 import math 
 import copy
 
@@ -86,12 +85,12 @@ class Player(pygame.sprite.Sprite):
             reward[0].type = 'none'
             reward[0].surf.fill((255,255,255))
         
+        #Update expectation
+        self.RL.updateExpectation(previousStateidx,actiontype, self.Center.outcome)
+        
         # Consequences may have change it's position
         self.detectCenter()
         self.detectSurround()
-        
-        #Update expectation
-        self.RL.updateExpectation(previousStateidx,actiontype, self.Center.outcome)
 
         
     def detectCenter(self):
@@ -149,7 +148,7 @@ def drawGrid():
             
             all_sprites.add(new_object)
 
-mouse = RectSprite((255, 0, 0), Square_Size, Square_Size, Square_Size, Square_Size, 1)
+mouse = RectSprite((0, 0, 0), Square_Size, Square_Size, Square_Size, Square_Size, 1)
 color = [(0,0,0), (255, 0, 0), (0,255,0),(0,0,255), (255,255,0), (255,0,255),(0,255,255), (255,255,255)]
 value = [1,1,1,1,1,1,1,1]
 coloridx = 0
@@ -160,6 +159,16 @@ def Converter():
     replacer[0].surf.fill(mouse.image.unmap_rgb(mouse.image.get_at_mapped((1,1))))
     replacer[0].outcome = mouse.value
     replacer[0].type = 'reward'   
+
+
+foodbar = RectSprite((255, 0, 0), Square_Size*9.5, Square_Size*8, Square_Size/4, Square_Size, 0)
+foodbar.value = 1
+
+def changeFood(value):
+    value = round(sorted((0, foodbar.rect[3]+(value*Square_Size),Square_Size))[1])
+    foodbar.rect.update((Square_Size*9.5, Square_Size*8, Square_Size/4, value))
+    foodbar.image = pygame.transform.scale(foodbar.image,(Square_Size/4, value))
+
 
 pygame.init()
 
@@ -204,7 +213,8 @@ while running:
     # Update the player sprite 
     ticker += 1
     
-    if ticker == 30:
+    if ticker == 20:
+        changeFood(-.01)
         player.update()
         ticker = 1
         
@@ -220,6 +230,7 @@ while running:
     for entity in all_sprites:
      screen.blit(entity.surf, entity.rect)
     screen.blit(mouse.image, mouse.rect)
+    screen.blit(foodbar.image, foodbar.rect)
     screen.blit(player.surf, player.rect)
     
 
