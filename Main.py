@@ -2,6 +2,8 @@
 # Check documentation - https://realpython.com/pygame-a-primer/
 
 # Import and initialize the pygame library
+from distutils.log import error
+from operator import truediv
 import pygame
 
 # Import random for random numbers
@@ -37,11 +39,12 @@ all_sprites = pygame.sprite.Group()
 
 
 class RectSprite(pygame.sprite.Sprite):
-    def __init__(self, color, x, y, w, h):
+    def __init__(self, color, x, y, w, h,o):
         super().__init__() 
         self.image = pygame.Surface((w, h))
         self.image.fill(color)
         self.rect = pygame.Rect(x, y, w, h)
+        self.value = o
 
 # Define a Player object by extending pygame.sprite.Sprite
 # The surface drawn on the screen is now an attribute of 'player'
@@ -53,7 +56,6 @@ class Player(pygame.sprite.Sprite):
         self.rect =   pygame.Rect(Square_Size*2, Square_Size*2, Square_Size, Square_Size)
 
         self.Center = []
-        self.CenterOutcome = []
         #self.detectCenter()
 
         self.Surround=[]
@@ -65,39 +67,55 @@ class Player(pygame.sprite.Sprite):
 # Move the sprite based on user keypresses
     def update(self):
 
+        #Where is it?
         self.detectCenter()
         self.detectSurround()
     
-        previousStateidx, actionidx, action = self.RL.makeAction(self)
+        #Make a movement
+        previousStateidx, actiontype, action = self.RL.makeAction(self)
         self.rect.move_ip(action['x']*Square_Size, action['y']*Square_Size)
 
+        #Where is it now?
         self.detectCenter()
 
-        if self.Center == 'collision':     
+        #What are the consequences?
+        if self.Center.type == 'collision':     
                 self.rect.move_ip(action['x']*-1*Square_Size, action['y']*-1*Square_Size)
+        elif self.Center.type == 'reward': 
+            reward = pygame.sprite.spritecollide(self, all_sprites,False)
+            reward[0].type = 'none'
+            reward[0].surf.fill((255,255,255))
         
-        self.RL.updateExpectation(previousStateidx,actionidx, self.CenterOutcome)
-    
+        # Consequences may have change it's position
         self.detectCenter()
         self.detectSurround()
+        
+        #Update expectation
+        self.RL.updateExpectation(previousStateidx,actiontype, self.Center.outcome)
 
         
     def detectCenter(self):
-
-        type = []
-        type = pygame.sprite.spritecollide(self, all_sprites,False)
-        self.Center = type[0].type
-        self.CenterOutcome = type[0].outcome
+        
+         for sprite in all_sprites:
+                if self.rect.colliderect(sprite.rect):
+                    self.Center = sprite
+        
+        
 
     def detectSurround(self):
 
-        Location = copy.copy(self.rect)
+        
         self.Surround = []
-        for loc in range(0,7):
-            Location.move_ip(math.sin(math.radians(loc*45))*Square_Size,math.cos(math.radians(loc*45))*Square_Size)
+        for loc in range(0,8):
+            Location = copy.copy(self.rect)
+            Location.move_ip(round(math.sin(math.radians(loc*45)))*Square_Size,round(math.cos(math.radians(loc*45)))*Square_Size)
+            ident = False
             for sprite in all_sprites:
                 if Location.colliderect(sprite.rect):
-                        self.Surround.append(sprite.type) 
+                        self.Surround.append(sprite) 
+                        ident = True
+            if ident == False:
+                    error('No Neighbors were identified?')
             
 
 # Define the enemy object by extending pygame.sprite.Sprite
@@ -130,7 +148,18 @@ def drawGrid():
                new_object.outcome = 0
             
             all_sprites.add(new_object)
-                
+
+mouse = RectSprite((255, 0, 0), Square_Size, Square_Size, Square_Size, Square_Size, 1)
+color = [(0,0,0), (255, 0, 0), (0,255,0),(0,0,255), (255,255,0), (255,0,255),(0,255,255), (255,255,255)]
+value = [1,1,1,1,1,1,1,1]
+coloridx = 0
+convert = False
+
+def Converter():
+    replacer = pygame.sprite.spritecollide(mouse, all_sprites,False)
+    replacer[0].surf.fill(mouse.image.unmap_rgb(mouse.image.get_at_mapped((1,1))))
+    replacer[0].outcome = mouse.value
+    replacer[0].type = 'reward'   
 
 pygame.init()
 
@@ -148,10 +177,6 @@ running = True
 # Setup the clock for a decent framerate
 clock = pygame.time.Clock()
 
-mouse = RectSprite((255, 0, 0), Square_Size, Square_Size, Square_Size, Square_Size)
-
-color = [(0,0,0), (255, 0, 0), (0,255,0),(0,0,255), (255,255,0), (255,0,255),(0,255,255), (255,255,255)]
-coloridx = 0
 while running:
 
     # Did the user click the window close button?
@@ -166,6 +191,12 @@ while running:
             coloridx += event.y
             coloridx = coloridx % len(color)
             mouse.image.fill(color[coloridx])
+            mouse.value = value[coloridx]
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            convert = True
+        elif event.type == pygame.MOUSEBUTTONUP:
+            convert = False
+            
         elif event.type == QUIT:
             running = False
 
@@ -178,18 +209,22 @@ while running:
     mouse.rect = pygame.Rect(mousepos[0], mousepos[1],Square_Size, Square_Size)
 
     # Draw all sprites
+    
+    if convert:
+        Converter()
+    
     for entity in all_sprites:
      screen.blit(entity.surf, entity.rect)
-
+    screen.blit(mouse.image, mouse.rect)
     screen.blit(player.surf, player.rect)
     
 
-    screen.blit(mouse.image, mouse.rect)
+    
     # Flip the display
     pygame.display.flip()
 
     # Ensure program maintains a rate of 30 frames per second
-    clock.tick(20)
+    clock.tick(30)
 
 # Done! Time to quit.
 pygame.quit()
