@@ -176,7 +176,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 running = True
 # Setup the clock for a decent framerate
 clock = pygame.time.Clock()
-
+ticker = 1
 while running:
 
     # Did the user click the window close button?
@@ -202,8 +202,12 @@ while running:
 
 
     # Update the player sprite 
-    player.update()
-
+    ticker += 1
+    
+    if ticker == 30:
+        player.update()
+        ticker = 1
+        
     mousepos = pygame.mouse.get_pos()
     mousepos = (round((mousepos[0]-(.5*Square_Size))/Square_Size)*Square_Size, round((mousepos[1]-(.5*Square_Size))/Square_Size)*Square_Size)
     mouse.rect = pygame.Rect(mousepos[0], mousepos[1],Square_Size, Square_Size)
